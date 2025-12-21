@@ -27,10 +27,32 @@ df = pd.DataFrame({
 "salary": [3453,4324,None,5423]
 })
 
+#%%
 #To drop rows where a subset has one na value
 df.dropna(how="all",subset=["ages"])
 
+#%%
 #To drop rows where the value of column "ages" or "names" are na.
 df.dropna(how="any", subset=["ages","names"])
+
+# %%
+
+#To drop rows where the value of column "ages" and "names" are na.
+df.dropna(how="all", subset=["ages","names"])
+
+#%%
+
+#To fill na values in column ages with other value
+df["ages"].fillna(0)
+
+# %%
+
+#To fill na values in all dataframe
+df.fillna(0)
+
+#To fill na values when you specifies what values you put in each column
+df.fillna({"names":"alguem","ages":0.0, "salary":0.0})
+#or (if you want to put the mean in na)
+df.fillna(df[["ages","salary"]].mean())
 
 # %%
