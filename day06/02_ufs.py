@@ -70,8 +70,7 @@ def mortality_to_float(x:str):
     
 df["Mortalidade infantil (2016)"] = df["Mortalidade infantil (2016)"].apply(mortality_to_float)
 
-def classify_good(linha):
-    linha = pd.Series()
+def classify_good(linha:pd.Series):
     return (
         (linha["PIB per capita (R$) (2015)"] > 30000) 
         *
@@ -81,3 +80,4 @@ def classify_good(linha):
 
 #The parameter axis indicate that the parameter is a row of my dataframe. OBS: The default is axis=0 that means column.
 df.apply(classify_good,axis=1)
+# %%
