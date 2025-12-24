@@ -12,13 +12,15 @@ clients.head()
 def mean_social_media(line:pd.Series):
     return (line["flEmail"]) + (line["flTwitch"]) + (line["flYouTube"]) + (line["flBlueSky"]) + (line["flInstagram"])
 
-social_media_clients = pd.DataFrame(clients.apply(mean_social_media,axis=1),columns=["values"])
+social_media_clients = pd.DataFrame()
+social_media_clients["values"] = clients.apply(mean_social_media,axis=1)
 
 social_media_clients.agg(
     {
         "values": ["mean","std","max"]
     }
 )
+
 
 # %%
 
@@ -45,20 +47,37 @@ clients.sort_values(ascending=False,by="qtdePontos").head(1)
 
 #06.04 - Quem teve mais transações de Streak?
 
+transactions = pd.read_csv("../data/transacoes.csv",encoding="latin-1",sep=";")
 transactions_products = pd.read_csv("../data/transacao_produto.csv",encoding="latin-1",sep=";")
 transactions_products
 
-#%%
-
 products = pd.read_csv("../data/produtos.csv",encoding="latin-1",sep=";")
 
-products.dtypes
-# %%
-
-transactions = transactions.merge(right=transactions_products,on="IdTransacao")[["IdTransacao","IdCliente","IdProduto_y"]].rename(columns={"IdProduto_y":"IdProduto"})
-
-transactions = transactions.dropna(subset=["IdProduto"])
 #%%
-transactions.merge(right=products,on="IdProduto")
+
+transactions = transactions.merge(right=transactions_products,on="IdTransacao", 
+suffixes=["transacao","transacao_produto"])
+
+
+transactions = transactions[pd.to_numeric(transactions["IdProduto"],errors="coerce").notna()]
+
+transactions["IdProduto"] = transactions["IdProduto"].astype("int64")
+
+transactions = transactions.merge(right=products,on="IdProduto") 
+
+transactions = transactions[transactions['DescNomeProduto'] == "PresenÃ§a Streak"]
+
+transactions.groupby(["IdCliente"])["IdTransacao"].count().sort_values(ascending=False).head(1)
+
+#%%
+#or - this is more fasty to pandas because I filter the values before merge of dataframes.
+products = products[products["DescNomeProduto"] == "PresenÃ§a Streak"]
+
+transactions_products = transactions_products[pd.to_numeric(transactions_products["IdProduto"],errors="coerce").notna()]
+
+transactions_products["IdProduto"] = transactions_products["IdProduto"].astype("int64")
+
+transactions.merge(transactions_products,on=["IdTransacao"],how="left").merge(products,on=["IdProduto"],how="right").groupby(by=["IdCliente"])["IdTransacao"].count().sort_values(ascending=False).head(1)
+ 
 
 # %%
